@@ -59,8 +59,11 @@ void Renderer::singleSphere(const Sphere sphere){
 }
 
 pixelColor Renderer::castRay(const Vector3 origin, const Vector3 direction, Sphere sphere){
+    // Sphere color
     if(sphere.rayIntersect(origin, direction))
-        return pixelColor(0.2, 0.7, 0.8);
+        return Colors::Cyan();
+    
+    // Background color
     else
-        return pixelColor(0.3, 0.3, 0.3);
+        return Colors::Gray();
 }

@@ -7,6 +7,7 @@
 
 #include "vector3.h"
 #include "geometry.h"
+#include "colors.h"
 
 #ifndef RENDERER_H
 #define RENDERER_H

@@ -7,32 +7,60 @@ Renderer::Renderer(int width, int height){
     std::cout << "Framebuffer Size: " << framebuffer.size() << std::endl;
 
     outputFile.open("./outputImage.ppm");
+    std::cout << "Starting render." << std::endl;
+    startTime = std::chrono::high_resolution_clock::now();
 }
 
 Renderer::~Renderer(){
+    // Stop counting time
+    endTime = std::chrono::high_resolution_clock::now();
+    
+    // Write to output file and close it
+    outputFile << "P6\n" << w << " " << h << "\n255\n";
+    for(std::vector<pixelColor>::iterator it = framebuffer.begin(); it != framebuffer.end(); it++){
+        outputFile << (char)(255 * std::max(0., std::min(1., (*it).x)));
+        outputFile << (char)(255 * std::max(0., std::min(1., (*it).y)));
+        outputFile << (char)(255 * std::max(0., std::min(1., (*it).z)));
+    }
+    
     outputFile.close();
+
+    std::cout << "Finished render." << std::endl;
+    std::cout << "Elapsed time: " 
+        << (std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime)).count() 
+        << " milliseconds." << std::endl;
 }
 
-void Renderer::render(){
-    std::cout << "Starting render." << std::endl;
-    time(&startTime);
-
-    // Generate sample input
+void Renderer::gradientRender(){
+    // Generate sample output
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
             framebuffer[i + j * w](j / double(h), i / double(w), 0);
         }
     }
+}
 
-    // Write to output file
-    outputFile << "P6\n" << w << " " << h << "\n255\n";
-    for(std::vector<pixelColor>::iterator it = framebuffer.begin(); it != framebuffer.end(); it++){
-        outputFile << (char)(255 * std::max(0.d, std::min(1.d, (*it).x)));
-        outputFile << (char)(255 * std::max(0.d, std::min(1.d, (*it).y)));
-        outputFile << (char)(255 * std::max(0.d, std::min(1.d, (*it).z)));
+void Renderer::singleSphere(const Sphere sphere){
+    // Preallocate variables
+    double x = 0;
+    double y = 0;
+    
+    // Generate raycasting output
+    for(int i = 0; i < w; i++){
+        for(int j = 0; j < h; j++){
+            x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
+            y = -(2 * (j + 0.5) / (float)h - 1) * tan(fov/2.);
+
+            Vector3 direction = Vector3(x, y, -1).normalize();
+
+            framebuffer[i + j * w] = castRay(cameraLocation, direction, sphere);
+        }
     }
+}
 
-    time(&endTime);
-    std::cout << "Finished render.";
-    std::cout << "Elapsed time: " << double(endTime - startTime) << " seconds." << std::endl; 
+pixelColor Renderer::castRay(const Vector3 origin, const Vector3 direction, Sphere sphere){
+    if(sphere.rayIntersect(origin, direction))
+        return pixelColor(0.2, 0.7, 0.8);
+    else
+        return pixelColor(0.3, 0.3, 0.3);
 }

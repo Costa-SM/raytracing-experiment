@@ -1,8 +1,8 @@
 #include <cmath>
 #include <iostream>
 
-#ifndef VECTORS_H
-#define VECTORS_H
+#ifndef VECTOR3_H
+#define VECTOR3_H
 
 // Vector3 Declarations
 class Vector3 {

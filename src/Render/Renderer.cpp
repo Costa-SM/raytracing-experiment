@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "Renderer.h"
 
 Renderer::Renderer(int width, int height){
     this->w = width;
@@ -18,9 +18,9 @@ Renderer::~Renderer(){
     // Write to output file and close it
     outputFile << "P6\n" << w << " " << h << "\n255\n";
     for(std::vector<pixelColor>::iterator it = framebuffer.begin(); it != framebuffer.end(); it++){
-        outputFile << (char)(255 * std::max(0., std::min(1., (*it).x)));
-        outputFile << (char)(255 * std::max(0., std::min(1., (*it).y)));
-        outputFile << (char)(255 * std::max(0., std::min(1., (*it).z)));
+        outputFile << (char)((int) (std::min(255., std::max(0., (*it).x))));
+        outputFile << (char)((int) (std::min(255., std::max(0., (*it).y))));
+        outputFile << (char)((int) (std::min(255., std::max(0., (*it).z))));
     }
     
     outputFile.close();
@@ -35,7 +35,7 @@ void Renderer::gradientRender(){
     // Generate sample output
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
-            framebuffer[i + j * w](j / double(h), i / double(w), 0);
+            framebuffer[i + j * w](255 * j / double(h), 255 * i / double(w), 0);
         }
     }
 }
@@ -55,6 +55,12 @@ void Renderer::singleSphere(const Sphere sphere){
 
             framebuffer[i + j * w] = castRay(cameraLocation, direction, sphere);
         }
+    }
+}
+
+void Renderer::multipleSpheres(const std::vector<Sphere> spheres){
+    for(std::vector<Sphere>::const_iterator it = spheres.begin(); it != spheres.end(); it++){
+        continue;        
     }
 }
 

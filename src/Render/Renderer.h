@@ -5,9 +5,8 @@
 #include <vector>
 #include <chrono>
 
-#include "vector3.h"
-#include "geometry.h"
-#include "colors.h"
+#include "Geometry.h"
+#include "Colors.h"
 
 #ifndef RENDERER_H
 #define RENDERER_H
@@ -20,6 +19,7 @@ public:
     ~Renderer();
     void gradientRender();
     void singleSphere(const Sphere sphere);
+    void multipleSpheres(const std::vector<Sphere> spheres);
 
     pixelColor castRay(const Vector3 origin, const Vector3 direction, const Sphere sphere);
 

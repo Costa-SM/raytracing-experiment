@@ -1,4 +1,4 @@
-#include "vector3.h"
+#include "Vector3.h"
 
 #ifndef RENDERER_COLORS_H
 #define RENDERER_COLORS_H

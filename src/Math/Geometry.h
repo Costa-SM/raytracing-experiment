@@ -1,4 +1,4 @@
-#include "vector3.h"
+#include "Vector3.h"
 
 #ifndef GEOMETRY_H
 #define GEOMETRY_H

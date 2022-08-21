@@ -1,4 +1,4 @@
-#include "geometry.h"
+#include "Geometry.h"
 
 // Sphere Definitions
 Sphere::Sphere(){

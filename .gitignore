@@ -8,5 +8,5 @@ CMakeCache.txt
 Makefile
 
 # Build and execution files
-simple_raytracer
-outputImage.ppm
+binaries
+build

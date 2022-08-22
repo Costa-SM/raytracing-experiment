@@ -17,6 +17,8 @@ public:
     Vector3 operator-(const Vector3 otherVector);
     Vector3 operator*(const double scalar);
     Vector3 operator/(const double scalar);
+    bool operator==(const Vector3 otherVector);
+    bool operator!=(const Vector3 otherVector);
     void operator()(double X, double Y, double Z);
     friend std::ostream& operator<<(std::ostream& out, Vector3& vector);
     

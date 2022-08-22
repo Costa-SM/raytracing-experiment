@@ -58,16 +58,47 @@ void Renderer::singleSphere(const Sphere sphere){
     }
 }
 
-void Renderer::multipleSpheres(const std::vector<Sphere> spheres){
-    for(std::vector<Sphere>::const_iterator it = spheres.begin(); it != spheres.end(); it++){
-        continue;        
+void Renderer::multipleSpheres(std::vector<Sphere> spheres){
+    // Preallocate variables
+    double x = 0;
+    double y = 0;
+    
+    // Generate raycasting output
+    for(int i = 0; i < w; i++){
+        for(int j = 0; j < h; j++){
+            x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
+            y = -(2 * (j + 0.5) / (float)h - 1) * tan(fov/2.);
+
+            Vector3 direction = Vector3(x, y, -1).normalize();
+
+            // @TODO: Optimize the raycasting operation.
+            // Iterating over all spheres every single operation is not good practice.
+            bool differentColor = false;
+            double smallestDistance = INFINITY;
+
+            color currentPixel;
+            double currentDistance;
+            for(std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); it++){
+                currentPixel = castRay(cameraLocation, direction, *it);
+                currentDistance = (*it).getCenter().abs();
+                
+                if(currentPixel != Colors::Gray() && smallestDistance > currentDistance){
+                    framebuffer[i + j * w] = currentPixel;
+                    differentColor = true;
+                    smallestDistance = currentDistance;
+                }
+            }
+            
+            if(!differentColor)
+                framebuffer[i + j * w] = Colors::Gray();
+        }
     }
 }
 
 pixelColor Renderer::castRay(const Vector3 origin, const Vector3 direction, Sphere sphere){
     // Sphere color
     if(sphere.rayIntersect(origin, direction))
-        return Colors::Cyan();
+        return sphere.getMaterial();
     
     // Background color
     else

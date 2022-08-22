@@ -2,7 +2,7 @@
 
 int main(){
     Renderer newRenderer(1024, 768);
-    Sphere newSphere(-3, 0, -16, 1);
+    Sphere newSphere(-3, 0, -16, 1, Colors::Red());
 
     newRenderer.singleSphere(newSphere);
 

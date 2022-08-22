@@ -25,6 +25,7 @@ Vector3 Vector3::operator-(const Vector3 otherVector){
     return Vector3(x - otherVector.x, y - otherVector.y, z - otherVector.z);
 }
 
+
 Vector3 Vector3::operator*(const double scalar){
     return Vector3(this->x * scalar, this->y * scalar, this->z * scalar);
 }
@@ -36,6 +37,18 @@ Vector3 operator*(const double scalar, Vector3& vector){
 Vector3 Vector3::operator/(const double scalar){
     double m = this->abs();
     return Vector3(this->x / m, this->y / m, this->z / m);
+}
+
+bool Vector3::operator==(const Vector3 otherVector){
+    if(x - otherVector.x < 0.000001 && y - otherVector.y < 0.000001 && z - otherVector.z < 0.000001)
+        return true;
+    else return false;
+}
+
+bool Vector3::operator!=(const Vector3 otherVector){
+    if(x - otherVector.x < 0.000001 && y - otherVector.y < 0.000001 && z - otherVector.z < 0.000001)
+        return false;
+    else return true;
 }
 
 void Vector3::operator()(double X, double Y, double Z){

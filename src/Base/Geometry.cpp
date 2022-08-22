@@ -6,32 +6,33 @@ Sphere::Sphere(){
     sphereCenter.y = 0;
     sphereCenter.z = 0;
     r = 0;
+    materialColor = Colors::White();
 }
 
-Sphere::Sphere(double X, double Y, double Z, double R){
+Sphere::Sphere(double X, double Y, double Z, double R, color material){
     sphereCenter.x = X;
     sphereCenter.y = Y;
     sphereCenter.z = Z;
     r = R;
+    materialColor = material;
 }
 
 Sphere::~Sphere(){
 
 }
 
+Vector3 Sphere::getCenter(){
+    return sphereCenter;
+}
+
 double Sphere::getRadius(){
     return r;
 }
 
+color Sphere::getMaterial(){
+    return materialColor;
+}
 
-/**
- * @brief Function to calculate how many intersections a given ray has
- * with the current sphere.
- * 
- * @param origin Origin point for the given ray.
- * @param direction Direction that the ray follows.
- * @return int 
- */
 int Sphere::rayIntersect(Vector3 origin, Vector3 direction){
     // Calculate which point is the projection of the center
     // of the sphere onto the ray.

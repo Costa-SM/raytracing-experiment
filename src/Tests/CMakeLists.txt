@@ -7,5 +7,5 @@ foreach(file_path ${TEST_PROGRAMS})
     add_executable(${file_name_we} ${file_path})
 
     # Add dependant libraries
-    target_link_libraries(${file_name_we} MATH_LIB RENDER_LIB)
+    target_link_libraries(${file_name_we} BASE_LIB RENDER_LIB)
 endforeach()

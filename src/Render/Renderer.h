@@ -19,7 +19,7 @@ public:
     ~Renderer();
     void gradientRender();
     void singleSphere(const Sphere sphere);
-    void multipleSpheres(const std::vector<Sphere> spheres);
+    void multipleSpheres(std::vector<Sphere> spheres);
 
     pixelColor castRay(const Vector3 origin, const Vector3 direction, const Sphere sphere);
 

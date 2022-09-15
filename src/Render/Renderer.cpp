@@ -1,12 +1,12 @@
 #include "Renderer.h"
 
-Renderer::Renderer(int width, int height){
+Renderer::Renderer(int width, int height, std::string filename){
     this->w = width;
     this->h = height;
     framebuffer = std::vector<pixelColor>(width * height);
     std::cout << "Framebuffer Size: " << framebuffer.size() << std::endl;
 
-    outputFile.open("./outputImage.ppm");
+    outputFile.open("./" + filename + ".ppm");
     std::cout << "Starting render." << std::endl;
     startTime = std::chrono::high_resolution_clock::now();
 }
@@ -33,6 +33,7 @@ Renderer::~Renderer(){
 
 void Renderer::gradientRender(){
     // Generate sample output
+    #pragma omp parallel for
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
             framebuffer[i + j * w](255 * j / double(h), 255 * i / double(w), 0);
@@ -40,12 +41,13 @@ void Renderer::gradientRender(){
     }
 }
 
-void Renderer::singleSphere(const Sphere sphere){
-    // Preallocate variables
-    double x = 0;
-    double y = 0;
+void Renderer::singleSphere(Sphere sphere){
+    // Reset variables
+    x = 0;
+    y = 0;
     
     // Generate raycasting output
+    #pragma omp parallel for
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
             x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
@@ -53,17 +55,18 @@ void Renderer::singleSphere(const Sphere sphere){
 
             Vector3 direction = Vector3(x, y, -1).normalize();
 
-            framebuffer[i + j * w] = castRay(cameraLocation, direction, sphere);
+            framebuffer[i + j * w] = sphere.rayIntersect(cameraLocation, direction, backgroundColor);
         }
     }
 }
 
 void Renderer::multipleSpheres(std::vector<Sphere> spheres){
-    // Preallocate variables
-    double x = 0;
-    double y = 0;
+    // Reset variables
+    x = 0;
+    y = 0;
     
     // Generate raycasting output
+    #pragma omp parallel for
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
             x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
@@ -72,35 +75,63 @@ void Renderer::multipleSpheres(std::vector<Sphere> spheres){
             Vector3 direction = Vector3(x, y, -1).normalize();
 
             // @TODO: Optimize the raycasting operation.
-            // Iterating over all spheres every single operation is not good practice.
-            bool differentColor = false;
+            // Iterating over all spheres every single operation is not good practice. (?)
             double smallestDistance = INFINITY;
 
+            bool hitSphere = false;
             color currentPixel;
             double currentDistance;
             for(std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); it++){
-                currentPixel = castRay(cameraLocation, direction, *it);
+                currentPixel = (*it).rayIntersect(cameraLocation, direction, backgroundColor);
                 currentDistance = (*it).getCenter().abs();
                 
-                if(currentPixel != Colors::Gray() && smallestDistance > currentDistance){
-                    framebuffer[i + j * w] = currentPixel;
-                    differentColor = true;
+                if(smallestDistance > currentDistance && currentPixel != backgroundColor){
+                    hitSphere = true;
                     smallestDistance = currentDistance;
+                    framebuffer[i + j * w] = currentPixel;
                 }
             }
-            
-            if(!differentColor)
-                framebuffer[i + j * w] = Colors::Gray();
+
+            if(!hitSphere)
+                framebuffer[i + j * w] = backgroundColor;
         }
     }
 }
 
-pixelColor Renderer::castRay(const Vector3 origin, const Vector3 direction, Sphere sphere){
-    // Sphere color
-    if(sphere.rayIntersect(origin, direction))
-        return sphere.getMaterial();
+void Renderer::renderWithLighting(std::vector<Sphere> spheres, std::vector<LightSource> lights){
+    // Reset variables
+    x = 0;
+    y = 0;
     
-    // Background color
-    else
-        return Colors::Gray();
+    // Generate raycasting output
+    #pragma omp parallel for
+    for(int i = 0; i < w; i++){
+        for(int j = 0; j < h; j++){
+            x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
+            y = -(2 * (j + 0.5) / (float)h - 1) * tan(fov/2.);
+
+            Vector3 direction = Vector3(x, y, -1).normalize();
+
+            // @TODO: Optimize the raycasting operation.
+            // Iterating over all spheres every single operation is not good practice. (?)
+            double smallestDistance = INFINITY;
+
+            bool hitSphere = false;
+            color currentPixel;
+            double currentDistance;
+            for(std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); it++){
+                currentPixel = (*it).pixelColor(cameraLocation, direction, backgroundColor, lights);
+                currentDistance = (*it).getCenter().abs();
+                
+                if(smallestDistance > currentDistance && currentPixel != backgroundColor){
+                    hitSphere = true;
+                    smallestDistance = currentDistance;
+                    framebuffer[i + j * w] = currentPixel;
+                }
+            }
+
+            if(!hitSphere)
+                framebuffer[i + j * w] = backgroundColor;
+        }
+    }
 }

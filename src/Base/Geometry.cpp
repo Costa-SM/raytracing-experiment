@@ -33,7 +33,7 @@ color Sphere::getMaterial(){
     return materialColor;
 }
 
-int Sphere::rayIntersect(Vector3 origin, Vector3 direction){
+color Sphere::rayIntersect(Vector3 origin, Vector3 direction, color backgroundColor){
     // Calculate which point is the projection of the center
     // of the sphere onto the ray.
     Vector3 distanceVector = sphereCenter - origin - 
@@ -42,10 +42,37 @@ int Sphere::rayIntersect(Vector3 origin, Vector3 direction){
 
     double distance = distanceVector.abs();
 
-    if(std::abs(distance - r) < epsilon)
-        return 1;
-    else if(distance < r)
-        return 2;
+    if(std::abs(distance - r) < epsilon || distance < r)
+        return materialColor;
     else 
-        return 0;
+        return backgroundColor;
+}
+
+color Sphere::pixelColor(Vector3 origin, Vector3 direction, color backgroundColor, std::vector<LightSource> lights){
+    // Calculate which point is the projection of the center of the sphere onto the ray.
+    double dotCamera = Vector3::dotProduct(sphereCenter - origin, direction);
+
+    // If the dot product is negative, the sphere is behind the camera.
+    if(dotCamera < 0)
+        return backgroundColor;
+
+    Vector3 centerToProjected = (origin + (dotCamera / Vector3::dotProduct(direction, direction) * direction)) - sphereCenter;
+    double distanceToProjection = centerToProjected.abs();
+
+    if(distanceToProjection > r)
+        return backgroundColor;
+    
+    double moduleToIntersection = sqrt(r * r - distanceToProjection * distanceToProjection);
+    Vector3 intersectionPoint = sphereCenter + centerToProjected - moduleToIntersection * direction;
+
+    lightIntensity = 0;
+    for(std::vector<LightSource>::iterator it = lights.begin(); it != lights.end(); ++it){
+        Vector3 lightDirection = ((*it).getPosition() - intersectionPoint).normalize();
+
+        double cosineAngle = Vector3::dotProduct(lightDirection, (intersectionPoint - sphereCenter).normalize());
+        lightIntensity += (*it).getIntensity() * std::max(1.0, cosineAngle);
+    }
+
+    Vector3 returnedColor = materialColor * lightIntensity;
+    return returnedColor;
 }

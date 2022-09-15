@@ -26,6 +26,7 @@ public:
     double abs();
     Vector3 normalize();
     static double dotProduct(Vector3 v1, Vector3 v2);
+    static double angleBetweenVectors(Vector3 v1, Vector3 v2);
     static Vector3 crossProduct(Vector3 v1, Vector3 v2);
 
     // Vector variables

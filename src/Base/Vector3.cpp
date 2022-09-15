@@ -74,6 +74,10 @@ double Vector3::dotProduct(Vector3 v1, Vector3 v2){
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
+double Vector3::angleBetweenVectors(Vector3 v1, Vector3 v2){
+    return acos(dotProduct(v1, v2) / (v1.abs() * v2.abs()));
+}
+
 Vector3 Vector3::crossProduct(Vector3 v1, Vector3 v2){
     
     return Vector3();

@@ -1,5 +1,8 @@
+#include <vector>
+
 #include "Vector3.h"
 #include "Colors.h"
+#include "Light.h"
 
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
@@ -26,13 +29,26 @@ public:
      * 
      * @param origin Origin point for the given ray.
      * @param direction Direction that the ray follows.
-     * @return int 
+     * @param backgroundColor Color of the image background.
+     * @return color 
      */
-    int rayIntersect(Vector3 origin, Vector3 direction);
+    color rayIntersect(Vector3 origin, Vector3 direction, color backgroundColor);
+
+    /**
+     * @brief Function to determine what is the color of the current point in
+     * space.
+     * 
+     * @param origin Origin point for the given ray.
+     * @param direction Direction that the ray follows.
+     * @param lights Vector containing the existing light sources.
+     * @return color 
+     */
+    color pixelColor(Vector3 origin, Vector3 direction, color backgroundColor, std::vector<LightSource> lights);
 private:
     Vector3 sphereCenter;
     color materialColor;
     double r;
+    double lightIntensity;
 };
 
 #endif

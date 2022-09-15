@@ -4,9 +4,11 @@
 #include <cmath>
 #include <vector>
 #include <chrono>
+#include <string>
 
 #include "Geometry.h"
 #include "Colors.h"
+#include "Light.h"
 
 #ifndef RENDERER_H
 #define RENDERER_H
@@ -15,18 +17,21 @@ using pixelColor = Vector3;
 
 class Renderer {
 public:
-    Renderer(int width, int height);
+    Renderer(int width, int height, std::string filename);
     ~Renderer();
     void gradientRender();
-    void singleSphere(const Sphere sphere);
+    void singleSphere(Sphere sphere);
     void multipleSpheres(std::vector<Sphere> spheres);
-
-    pixelColor castRay(const Vector3 origin, const Vector3 direction, const Sphere sphere);
+    void renderWithLighting(std::vector<Sphere> spheres, std::vector<LightSource> lights);
 
 private:
+    // Preallocated variables
+    double x, y;
+
     int w, h;
     int fov = 120;
     Vector3 cameraLocation = Vector3(0, 0, 0);
+    color backgroundColor = Colors::SkyBlue();
 
     std::vector<pixelColor> framebuffer;
     std::ofstream outputFile;

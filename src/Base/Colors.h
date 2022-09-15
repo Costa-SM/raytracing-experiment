@@ -17,6 +17,7 @@ public:
     static color LightGray();
 
     static color Cyan();
+    static color SkyBlue();
 };
 
 #endif

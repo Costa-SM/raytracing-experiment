@@ -31,3 +31,7 @@ color Colors::Gray(){
 color Colors::Cyan(){
     return Vector3(0, 255, 255);
 }
+
+color Colors::SkyBlue(){
+    return Vector3(135, 206, 235);
+}

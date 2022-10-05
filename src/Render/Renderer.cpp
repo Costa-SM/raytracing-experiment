@@ -76,7 +76,7 @@ void Renderer::multipleSpheres(std::vector<Sphere> spheres){
 
             // @TODO: Optimize the raycasting operation.
             // Iterating over all spheres every single operation is not good practice. (?)
-            double smallestDistance = INFINITY;
+            double smallestDistance = std::numeric_limits<double>::max();
 
             bool hitSphere = false;
             color currentPixel;
@@ -99,12 +99,7 @@ void Renderer::multipleSpheres(std::vector<Sphere> spheres){
 }
 
 void Renderer::renderWithLighting(std::vector<Sphere> spheres, std::vector<LightSource> lights){
-    // Reset variables
-    x = 0;
-    y = 0;
-    
     // Generate raycasting output
-    #pragma omp parallel for
     for(int i = 0; i < w; i++){
         for(int j = 0; j < h; j++){
             x =  (2 * (i + 0.5) / (float)w - 1) * tan(fov/2.) * w / (float)h;
@@ -112,26 +107,30 @@ void Renderer::renderWithLighting(std::vector<Sphere> spheres, std::vector<Light
 
             Vector3 direction = Vector3(x, y, -1).normalize();
 
-            // @TODO: Optimize the raycasting operation.
-            // Iterating over all spheres every single operation is not good practice. (?)
-            double smallestDistance = INFINITY;
-
-            bool hitSphere = false;
-            color currentPixel;
-            double currentDistance;
-            for(std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); it++){
-                currentPixel = (*it).pixelColor(cameraLocation, direction, backgroundColor, lights);
-                currentDistance = (*it).getCenter().abs();
-                
-                if(smallestDistance > currentDistance && currentPixel != backgroundColor){
-                    hitSphere = true;
-                    smallestDistance = currentDistance;
-                    framebuffer[i + j * w] = currentPixel;
-                }
-            }
-
-            if(!hitSphere)
-                framebuffer[i + j * w] = backgroundColor;
+            framebuffer[i + j * w] = determinePixelColor(cameraLocation, direction, spheres, lights);
         }
     }
+}
+
+color Renderer::determinePixelColor(Vector3 origin, Vector3 direction, std::vector<Sphere> spheres, std::vector<LightSource> lights){
+    color pixelColor = backgroundColor;
+    double shortestDistance = std::numeric_limits<double>::max();
+
+    color temporaryColor;
+    double temporaryDistance = 0;
+    bool temporaryIntersection = false;
+    
+    for(std::vector<Sphere>::iterator it = spheres.begin(); it != spheres.end(); it++){
+        temporaryColor = (*it).pixelColor(origin, direction, backgroundColor, lights, &temporaryDistance, &temporaryIntersection);
+        
+        if(!temporaryIntersection)
+            continue;
+
+        else if(shortestDistance > temporaryDistance){
+            shortestDistance = temporaryDistance;
+            pixelColor = temporaryColor;
+        }
+    }
+
+    return pixelColor;
 }

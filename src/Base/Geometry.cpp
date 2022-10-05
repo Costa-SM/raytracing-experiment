@@ -17,6 +17,14 @@ Sphere::Sphere(double X, double Y, double Z, double R, color material){
     materialColor = material;
 }
 
+Sphere::Sphere(Vector3 center, double R, color material){
+    sphereCenter.x = center.x;
+    sphereCenter.y = center.y;
+    sphereCenter.z = center.z;
+    r = R;
+    materialColor = material;
+}
+
 Sphere::~Sphere(){
 
 }
@@ -48,31 +56,40 @@ color Sphere::rayIntersect(Vector3 origin, Vector3 direction, color backgroundCo
         return backgroundColor;
 }
 
-color Sphere::pixelColor(Vector3 origin, Vector3 direction, color backgroundColor, std::vector<LightSource> lights){
+color Sphere::pixelColor(Vector3 origin, Vector3 direction, color backgroundColor, std::vector<LightSource> lights, double* rayLength, bool* intersects){
+    *intersects = false;
+    
     // Calculate which point is the projection of the center of the sphere onto the ray.
     double dotCamera = Vector3::dotProduct(sphereCenter - origin, direction);
 
     // If the dot product is negative, the sphere is behind the camera.
-    if(dotCamera < 0)
+    if(dotCamera < 0){
+        *rayLength = -1;
         return backgroundColor;
+    }
 
     Vector3 centerToProjected = (origin + (dotCamera / Vector3::dotProduct(direction, direction) * direction)) - sphereCenter;
     double distanceToProjection = centerToProjected.abs();
 
-    if(distanceToProjection > r)
+    if(distanceToProjection > r){
+        *rayLength = -1;
         return backgroundColor;
-    
+    }
+
     double moduleToIntersection = sqrt(r * r - distanceToProjection * distanceToProjection);
     Vector3 intersectionPoint = sphereCenter + centerToProjected - moduleToIntersection * direction;
 
+    *rayLength = (intersectionPoint - origin).abs();
+
     lightIntensity = 0;
     for(std::vector<LightSource>::iterator it = lights.begin(); it != lights.end(); ++it){
-        Vector3 lightDirection = ((*it).getPosition() - intersectionPoint).normalize();
+        Vector3 lightDirection = (*it).getPosition() - intersectionPoint;
+        Vector3 normalVector = intersectionPoint - sphereCenter;
 
-        double cosineAngle = Vector3::dotProduct(lightDirection, (intersectionPoint - sphereCenter).normalize());
-        lightIntensity += (*it).getIntensity() * std::max(1.0, cosineAngle);
+        lightIntensity += (*it).getIntensity() * std::max(0.0, cos(Vector3::angleBetweenVectors(lightDirection, normalVector)));
     }
 
     Vector3 returnedColor = materialColor * lightIntensity;
+    *intersects = true;
     return returnedColor;
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <string>
+#include <limits>
 
 #include "Geometry.h"
 #include "Colors.h"
@@ -36,6 +37,7 @@ private:
     std::vector<pixelColor> framebuffer;
     std::ofstream outputFile;
     std::chrono::_V2::high_resolution_clock::time_point startTime, endTime;
+    color determinePixelColor(Vector3 origin, Vector3 direction, std::vector<Sphere> spheres, std::vector<LightSource> lights);
 };
 
 #endif
